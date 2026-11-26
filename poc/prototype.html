@@ -1,0 +1,2166 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>운명원 Studio | 유튜브 댓글 프로토타입</title>
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
+<style>
+:root {
+  --rail-bg: #0f1419;
+  --rail-hover: #1d252d;
+  --rail-active: #1a2d27;
+  --rail-ink: #8b98a5;
+  --rail-ink-active: #34d399;
+
+  --bg: #f5f6f8;
+  --surface: #ffffff;
+  --surface-2: #f8f9fb;
+  --surface-3: #f1f3f6;
+  --border: #e5e7eb;
+  --border-subtle: #eff1f4;
+  --border-strong: #d1d5db;
+
+  --ink: #0f172a;
+  --ink-2: #334155;
+  --muted: #64748b;
+  --muted-2: #94a3b8;
+
+  --brand: #115e49;
+  --brand-hover: #0d4b3a;
+  --brand-active: #093a2c;
+  --brand-soft: #ecfdf5;
+  --brand-soft-2: #d1fae5;
+  --brand-border: #a7f3d0;
+  --brand-ink: #0c4d3b;
+
+  --ok-bg: #ecfdf5;
+  --ok-ink: #047857;
+  --ok-border: #a7f3d0;
+  --warn-bg: #fffbeb;
+  --warn-ink: #b45309;
+  --warn-border: #fde68a;
+  --danger-bg: #fef2f2;
+  --danger-ink: #dc2626;
+  --danger-border: #fecaca;
+  --yt-blue: #065fd4;
+
+  --rail-w: 60px;
+  --feed-w: 332px;
+  --inspector-w: 356px;
+  --topbar-h: 54px;
+
+  --shadow-xs: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm: 0 1px 3px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.03);
+  --shadow-md: 0 6px 20px rgba(15, 23, 42, 0.07);
+  --shadow-modal: 0 24px 48px -12px rgba(15, 23, 42, 0.28);
+  --focus-ring: 0 0 0 3px rgba(17, 94, 73, 0.16);
+
+  font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+  color: var(--ink);
+  background: var(--bg);
+  font-synthesis: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; overflow: hidden; }
+body { font-size: 13.5px; line-height: 1.5; background: var(--bg); color: var(--ink); }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: not-allowed; }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}
+h1, h2, h3, p { margin: 0; }
+a { color: inherit; text-decoration: none; }
+[hidden] { display: none !important; }
+svg { display: block; flex: none; }
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #d5dae2; border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: #aeb7c4; }
+
+/* ===================== APP FRAME (100vh) ===================== */
+.app-frame {
+  display: grid;
+  grid-template-columns: var(--rail-w) minmax(0, 1fr);
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* Dark Slim Activity Rail */
+.rail {
+  background: var(--rail-bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 0 14px;
+  gap: 8px;
+  z-index: 40;
+  border-right: 1px solid #1e262f;
+}
+.rail-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #1b8064 0%, #0e4f3d 100%);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  margin-bottom: 10px;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.24), inset 0 1px 0 rgba(255, 255, 255, 0.22);
+}
+.rail-btn {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 0;
+  background: transparent;
+  color: var(--rail-ink);
+  display: grid;
+  place-items: center;
+  transition: background 0.14s, color 0.14s;
+}
+.rail-btn:hover { background: var(--rail-hover); color: #e2e8f0; }
+.rail-btn.active { background: var(--rail-active); color: var(--rail-ink-active); }
+.rail-btn.active::before {
+  content: "";
+  position: absolute;
+  left: -10px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: #34d399;
+}
+.rail-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  border-radius: 99px;
+  background: #10b981;
+  color: #06281e;
+  font-size: 10px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  font-variant-numeric: tabular-nums;
+}
+.rail-badge[data-zero="true"] { display: none; }
+.rail-spacer { flex: 1; }
+.rail-quota {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 4px;
+  border-radius: 9px;
+  background: #171e26;
+  width: 44px;
+  margin-bottom: 4px;
+}
+.rail-quota strong {
+  font-size: 11px;
+  font-weight: 800;
+  color: #e2e8f0;
+  font-variant-numeric: tabular-nums;
+}
+.rail-quota span {
+  font-size: 9px;
+  color: var(--rail-ink);
+}
+.rail-avatar {
+  position: relative;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  color: #f8fafc;
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+}
+.rail-avatar::after {
+  content: "";
+  position: absolute;
+  right: -2px;
+  bottom: -2px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #10b981;
+  border: 2px solid var(--rail-bg);
+}
+
+/* ===================== MAIN CONTAINER ===================== */
+.main-shell {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Crisp Studio Header */
+.topbar {
+  height: var(--topbar-h);
+  flex: none;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.app-brand-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14.5px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.app-brand-title .studio-tag {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--brand-ink);
+  background: var(--brand-soft);
+  border: 1px solid var(--brand-border);
+  padding: 1.5px 7px;
+  border-radius: 99px;
+  letter-spacing: 0.01em;
+}
+.top-divider { width: 1px; height: 18px; background: var(--border); }
+.view-breadcrumb {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  white-space: nowrap;
+}
+.topbar-spacer { flex: 1; }
+
+.model-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.14s, border-color 0.14s;
+}
+.model-chip:hover { background: var(--surface); border-color: var(--border-strong); }
+.model-chip .dot { width: 6px; height: 6px; border-radius: 50%; background: #10b981; }
+.model-chip strong { color: var(--ink); font-weight: 700; }
+.model-chip .sep { color: var(--border-strong); }
+
+.top-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 650;
+  transition: background 0.14s, color 0.14s;
+}
+.top-btn:hover { background: var(--surface-3); color: var(--ink); }
+
+/* ===================== STUDIO VIEW (MASTER-DETAIL-INSPECTOR) ===================== */
+.studio-view {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: var(--feed-w) minmax(0, 1fr) var(--inspector-w);
+  overflow: hidden;
+}
+
+/* 1. LEFT FEED PANE */
+.feed-pane {
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.feed-header {
+  padding: 14px 14px 12px;
+  border-bottom: 1px solid var(--border-subtle);
+  flex: none;
+}
+.feed-top-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.feed-title {
+  font-size: 13.5px;
+  font-weight: 750;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.feed-count {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  background: var(--surface-3);
+  padding: 1px 7px;
+  border-radius: 99px;
+  font-variant-numeric: tabular-nums;
+}
+.feed-actions { display: flex; align-items: center; gap: 4px; }
+.mini-icon-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+  transition: background 0.14s, color 0.14s, border-color 0.14s;
+}
+.mini-icon-btn:hover { background: var(--surface-2); color: var(--ink); border-color: var(--border-strong); }
+.mini-icon-btn.active { background: var(--brand-soft); color: var(--brand-ink); border-color: var(--brand-border); }
+
+.fetch-row {
+  display: flex;
+  gap: 6px;
+}
+.topic-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 36px;
+  padding: 0 11px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.topic-pill svg { color: var(--brand); }
+.fetch-btn {
+  flex: 1;
+  height: 36px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 12.5px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  box-shadow: 0 1px 2px rgba(17, 94, 73, 0.25);
+  transition: background 0.14s, transform 0.08s;
+}
+.fetch-btn:hover:not(:disabled) { background: var(--brand-hover); }
+.fetch-btn:active:not(:disabled) { transform: translateY(1px); }
+.fetch-btn:disabled { background: #cbd5e1; color: #f8fafc; box-shadow: none; }
+
+.url-drawer {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+}
+.url-form { display: flex; gap: 6px; }
+.url-input {
+  flex: 1;
+  min-width: 0;
+  height: 34px;
+  border: 1px solid var(--border-strong);
+  border-radius: 7px;
+  padding: 0 10px;
+  font-size: 12px;
+  color: var(--ink);
+  background: var(--surface);
+  outline: none;
+}
+.url-input:focus { border-color: var(--brand); box-shadow: var(--focus-ring); }
+.url-submit {
+  height: 34px;
+  padding: 0 11px;
+  border-radius: 7px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 700;
+}
+.url-submit:hover { background: var(--surface-3); color: var(--ink); }
+.url-msg { font-size: 11px; color: var(--muted); margin-top: 5px; }
+
+.feed-filters {
+  display: flex;
+  gap: 4px;
+  padding: 8px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+  flex: none;
+}
+.feed-filter {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 650;
+  padding: 4px 9px;
+  border-radius: 6px;
+  transition: background 0.12s, color 0.12s;
+}
+.feed-filter:hover { color: var(--ink); }
+.feed-filter.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+
+.feed-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 10px;
+}
+.feed-empty {
+  height: 100%;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 24px 18px;
+  gap: 8px;
+  color: var(--muted);
+}
+.feed-empty-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  margin-bottom: 4px;
+}
+.feed-empty strong { font-size: 14px; color: var(--ink); font-weight: 750; }
+.feed-empty span { font-size: 12.5px; line-height: 1.5; max-width: 220px; }
+
+.video-list { display: flex; flex-direction: column; gap: 5px; }
+.video-item {
+  position: relative;
+  width: 100%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  text-align: left;
+  padding: 9px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: inherit;
+  transition: background 0.14s, border-color 0.14s;
+}
+.video-item:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border); }
+.video-item.selected {
+  background: #f0faf6;
+  border-color: #a7dfd0;
+}
+.video-item.selected::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 12px;
+  bottom: 12px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--brand);
+}
+.video-item:disabled { opacity: 0.55; }
+.v-thumb-wrap {
+  position: relative;
+  width: 94px;
+  height: 54px;
+  border-radius: 7px;
+  overflow: hidden;
+  flex: none;
+  background: #e2e8f0;
+}
+.v-thumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.v-flag {
+  position: absolute;
+  left: 4px;
+  bottom: 4px;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 1.5px 5px;
+  border-radius: 4px;
+  color: #fff;
+  background: rgba(180, 83, 9, 0.92);
+}
+.v-flag.done { background: rgba(4, 120, 87, 0.94); }
+.v-info { flex: 1; min-width: 0; }
+.v-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  line-height: 1.38;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.v-meta {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 2. CENTER EDITORIAL STUDIO */
+.editor-pane {
+  min-height: 0;
+  overflow-y: auto;
+  padding: 20px 26px 32px;
+  background: var(--bg);
+}
+.editor-inner {
+  max-width: 780px;
+  margin: 0 auto;
+}
+.stage-empty {
+  height: calc(100vh - var(--topbar-h) - 60px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 10px;
+  color: var(--muted);
+}
+.stage-empty-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--brand);
+  display: grid;
+  place-items: center;
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 4px;
+}
+.stage-empty h2 { font-size: 17px; font-weight: 800; color: var(--ink); letter-spacing: -0.025em; }
+.stage-empty p { font-size: 13px; color: var(--muted); max-width: 340px; line-height: 1.55; }
+
+.loading-stage {
+  height: calc(100vh - var(--topbar-h) - 100px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--muted);
+}
+.spinner {
+  width: 28px;
+  height: 28px;
+  border: 2.5px solid #e2e8f0;
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+.btn-spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255,255,255,0.35);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Video Context Header Card */
+.video-context {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-xs);
+}
+.video-context img {
+  width: 96px;
+  height: 54px;
+  border-radius: 8px;
+  object-fit: cover;
+  flex: none;
+  background: #e2e8f0;
+}
+.vc-body { flex: 1; min-width: 0; }
+.vc-badges { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; }
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 99px;
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+}
+.pill.warn { background: var(--warn-bg); color: var(--warn-ink); }
+.pill.neutral { background: var(--surface-3); color: var(--muted); }
+.vc-title {
+  font-size: 14.5px;
+  font-weight: 750;
+  color: var(--ink);
+  letter-spacing: -0.02em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.vc-meta { font-size: 12px; color: var(--muted); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.ext-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 32px;
+  padding: 0 11px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink-2);
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.ext-link:hover { background: var(--surface-3); color: var(--ink); }
+
+/* AI Concern Banner */
+.concern-card {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #f0faf6 0%, #ffffff 100%);
+  border: 1px solid #ccebe0;
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+}
+.concern-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--brand);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-top: 1px;
+}
+.concern-label {
+  font-size: 11px;
+  font-weight: 750;
+  color: var(--brand-ink);
+  letter-spacing: 0.01em;
+}
+.concern-text {
+  font-size: 15px;
+  font-weight: 750;
+  color: #0b2e23;
+  letter-spacing: -0.025em;
+  line-height: 1.45;
+  margin-top: 3px;
+}
+
+/* Captionless Warning */
+.warning-card {
+  margin-top: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  background: var(--warn-bg);
+  border: 1px solid var(--warn-border);
+  color: var(--warn-ink);
+  font-size: 12.5px;
+}
+.warning-head { display: flex; align-items: center; gap: 6px; font-weight: 750; margin-bottom: 4px; }
+.proof-input {
+  width: 100%;
+  min-height: 64px;
+  margin-top: 9px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #f5c97b;
+  background: #fff;
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  outline: none;
+}
+.proof-input:focus { border-color: #d97706; box-shadow: 0 0 0 3px rgba(217,119,6,0.14); }
+
+/* Hero Composer Card */
+.composer-card {
+  margin-top: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.composer-card:focus-within {
+  border-color: var(--brand);
+  box-shadow: var(--focus-ring), var(--shadow-sm);
+}
+.composer-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+}
+.composer-top-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.composer-top label {
+  font-size: 13px;
+  font-weight: 750;
+  color: var(--ink);
+}
+.composer-tools {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.seg-control {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 7px;
+  background: #e9edf2;
+  gap: 2px;
+}
+.seg-btn {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 650;
+  padding: 4px 9px;
+  border-radius: 5px;
+  transition: background 0.12s, color 0.12s;
+}
+.seg-btn.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-xs);
+}
+.ghost-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 11.5px;
+  font-weight: 650;
+}
+.ghost-btn:hover:not(:disabled) { background: var(--surface-3); color: var(--ink); }
+.ghost-btn:disabled { opacity: 0.45; }
+
+.draft-area {
+  display: block;
+  width: 100%;
+  min-height: 124px;
+  border: 0;
+  resize: vertical;
+  padding: 16px 18px 14px;
+  font-size: 15px;
+  line-height: 1.7;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  background: transparent;
+  outline: none;
+}
+.draft-area:focus-visible { box-shadow: none; }
+.draft-area:disabled { color: var(--muted); background: var(--surface-2); }
+
+.composer-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 16px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+}
+.checks-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.chk {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 650;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--ok-bg);
+  color: var(--ok-ink);
+  border: 1px solid var(--ok-border);
+}
+.chk.bad { background: var(--warn-bg); color: var(--warn-ink); border-color: var(--warn-border); }
+.counter-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+}
+.counter-bar {
+  width: 54px;
+  height: 5px;
+  border-radius: 99px;
+  background: #e2e8f0;
+  overflow: hidden;
+}
+.counter-bar span {
+  display: block;
+  height: 100%;
+  width: 0%;
+  background: var(--brand);
+  border-radius: 99px;
+  transition: width 0.2s, background 0.2s;
+}
+.counter-box.invalid .counter-bar span { background: #d97706; }
+.counter-num {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.counter-num strong { color: var(--ink); font-weight: 750; }
+.counter-box.invalid .counter-num strong { color: var(--warn-ink); }
+
+/* Studio Context & Controls Grid (First-Class Cards, No Buried Accordion) */
+.studio-card {
+  margin-top: 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-xs);
+  overflow: hidden;
+}
+.studio-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.studio-card-head h3 {
+  font-size: 12.5px;
+  font-weight: 750;
+  color: var(--ink);
+}
+.studio-card-body { padding: 14px 16px; }
+
+.scene-strip {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 8px;
+}
+.scene-btn {
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface-2);
+  padding: 9px 12px;
+  text-align: left;
+  transition: border-color 0.14s, background 0.14s;
+}
+.scene-btn:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface); }
+.scene-btn.active {
+  border-color: var(--brand);
+  background: var(--brand-soft);
+}
+.scene-time {
+  display: inline-block;
+  font-size: 10.5px;
+  font-weight: 750;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+  margin-bottom: 2px;
+}
+.scene-btn.active .scene-time { color: var(--brand-ink); }
+.scene-name {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.quote-box {
+  margin-top: 11px;
+  padding: 11px 14px;
+  border-radius: 9px;
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-left: 3px solid var(--brand);
+  font-size: 13px;
+  color: var(--ink-2);
+  line-height: 1.6;
+}
+.quote-box small {
+  display: block;
+  margin-top: 5px;
+  font-size: 11.5px;
+  color: var(--muted);
+}
+
+.controls-split {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 14px;
+  align-items: center;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-subtle);
+}
+.chip-row { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.chip {
+  border: 1px solid var(--border-strong);
+  border-radius: 99px;
+  background: var(--surface);
+  color: var(--ink-2);
+  padding: 5px 12px;
+  font-size: 12px;
+  font-weight: 650;
+  transition: background 0.14s, border-color 0.14s, color 0.14s;
+}
+.chip:hover:not(:disabled) { background: var(--surface-2); }
+.chip.active { background: var(--brand); border-color: var(--brand); color: #fff; }
+.sub-label { font-size: 11.5px; font-weight: 700; color: var(--muted); }
+.sub-hint { font-size: 11.5px; color: var(--muted); margin-top: 6px; }
+
+.switch-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 11px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink-2);
+  cursor: pointer;
+  white-space: nowrap;
+}
+.switch { position: relative; width: 34px; height: 19px; flex: none; }
+.switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.slider { position: absolute; inset: 0; background: #cbd5e1; border-radius: 99px; transition: background 0.18s; }
+.slider::before {
+  content: "";
+  position: absolute;
+  width: 13px;
+  height: 13px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+  transition: transform 0.18s;
+}
+.switch input:checked + .slider { background: var(--brand); }
+.switch input:checked + .slider::before { transform: translateX(15px); }
+
+.viewer-comments { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-subtle); }
+.vc-comment {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  font-size: 12px;
+  color: var(--ink-2);
+  background: var(--surface-2);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  padding: 8px 10px;
+  margin-top: 6px;
+  line-height: 1.5;
+}
+.vc-comment[type="button"] { width: 100%; text-align: left; cursor: pointer; }
+.vc-comment[type="button"][aria-pressed="true"] { border-color: #72a787; background: #edf7f0; }
+.vc-comment-idx {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #e2e8f0;
+  color: var(--ink-2);
+  font-size: 10px;
+  font-weight: 750;
+  display: grid;
+  place-items: center;
+  flex: none;
+  margin-top: 1px;
+}
+
+/* 3. RIGHT INSPECTOR & LIVE YOUTUBE PREVIEW */
+.inspector-pane {
+  background: var(--surface);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+.inspector-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.inspector-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  font-weight: 750;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 9px;
+}
+
+/* Live YouTube WYSIWYG Preview Card */
+.yt-preview-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+.yt-preview-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 11px;
+  font-weight: 650;
+  color: var(--muted);
+}
+.yt-live-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--brand-ink);
+  font-weight: 700;
+}
+.yt-live-badge i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #10b981;
+}
+.yt-live-badge.typing i { animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.35; } }
+
+.yt-preview-body { padding: 14px; }
+.yt-row { display: flex; gap: 10px; align-items: flex-start; }
+.yt-avatar {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--brand);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 800;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.yt-content { flex: 1; min-width: 0; }
+.yt-handle {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.yt-handle span { font-size: 11px; font-weight: 500; color: var(--muted); }
+.yt-comment-text {
+  margin-top: 5px;
+  font-size: 13px;
+  line-height: 1.58;
+  color: var(--ink-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  min-height: 40px;
+}
+.yt-comment-text.placeholder { color: var(--muted-2); font-style: italic; }
+.caret {
+  display: inline-block;
+  width: 1.5px;
+  height: 13px;
+  background: var(--ink);
+  vertical-align: -2px;
+  margin-left: 1px;
+  animation: blink 0.75s step-end infinite;
+}
+@keyframes blink { 50% { opacity: 0; } }
+.yt-actions-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 9px;
+  border-top: 1px solid var(--border-subtle);
+}
+.yt-fake-btns { display: flex; gap: 12px; font-size: 11px; color: var(--muted); }
+.yt-submit-chip {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 4px 11px;
+  border-radius: 99px;
+  background: var(--yt-blue);
+  color: #fff;
+  opacity: 0.35;
+  transition: opacity 0.2s;
+}
+.yt-submit-chip.ready { opacity: 1; }
+
+/* Pipeline Stepper */
+.pipeline {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.pipeline::before {
+  content: "";
+  position: absolute;
+  left: 19px;
+  top: 18px;
+  bottom: 18px;
+  width: 1.5px;
+  background: var(--border);
+}
+.step-row {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  color: var(--muted);
+  border: 1px solid transparent;
+}
+.step-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 1.5px solid var(--border-strong);
+  color: var(--muted);
+  font-size: 10.5px;
+  font-weight: 750;
+  display: grid;
+  place-items: center;
+  flex: none;
+  font-variant-numeric: tabular-nums;
+}
+.step-row.active {
+  background: var(--brand-soft);
+  border-color: var(--brand-border);
+  color: var(--brand-ink);
+  font-weight: 700;
+}
+.step-row.active .step-dot {
+  background: var(--brand);
+  border-color: var(--brand);
+  color: #fff;
+  box-shadow: 0 0 0 3px rgba(17, 94, 73, 0.16);
+}
+.step-row.done { color: var(--ink-2); font-weight: 600; }
+.step-row.done .step-dot { background: var(--ok-bg); border-color: var(--ok-border); color: var(--ok-ink); }
+.step-row.failed { background: var(--danger-bg); border-color: var(--danger-border); color: var(--danger-ink); font-weight: 700; }
+.step-row.failed .step-dot { background: var(--danger-ink); border-color: var(--danger-ink); color: #fff; }
+
+.stage-note { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.5; }
+.result-cta {
+  margin-top: 10px;
+  width: 100%;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--brand-border);
+  background: var(--brand-soft);
+  color: var(--brand-ink);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+.result-cta:hover { background: var(--brand-soft-2); }
+
+/* Recent Mini History inside Inspector */
+.mini-history-list { display: flex; flex-direction: column; gap: 6px; }
+.mini-h-item {
+  width: 100%;
+  text-align: left;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  transition: border-color 0.14s, background 0.14s;
+}
+.mini-h-item:hover { background: var(--surface); border-color: var(--border-strong); }
+.mini-h-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; font-size: 11px; }
+.mini-h-title {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sticky Publish Footer in Inspector */
+.inspector-dock {
+  flex: none;
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--border);
+  background: var(--surface);
+}
+.dock-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11.5px;
+  color: var(--muted);
+  margin-bottom: 9px;
+}
+.dock-meta strong { color: var(--ink); font-weight: 700; font-variant-numeric: tabular-nums; }
+.publish-btn {
+  width: 100%;
+  height: 44px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--brand);
+  color: #fff;
+  font-size: 13.5px;
+  font-weight: 750;
+  letter-spacing: -0.015em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 6px rgba(17, 94, 73, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: background 0.14s, transform 0.08s;
+}
+.publish-btn:hover:not(:disabled) { background: var(--brand-hover); }
+.publish-btn:active:not(:disabled) { transform: translateY(1px); }
+.publish-btn:disabled { background: #cbd5e1; color: #f8fafc; box-shadow: none; }
+.kbd {
+  font-size: 10.5px;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.18);
+  color: rgba(255, 255, 255, 0.92);
+}
+.publish-btn:disabled .kbd { display: none; }
+.dock-hint { font-size: 11.5px; color: var(--muted); margin-top: 8px; text-align: center; line-height: 1.45; }
+
+.scenario-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 11px;
+  color: var(--muted);
+}
+
+/* ===================== DEDICATED HISTORY VIEW ===================== */
+.history-view {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 22px 26px 32px;
+}
+.history-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.history-head {
+  padding: 18px 22px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.history-head h2 { font-size: 16px; font-weight: 800; color: var(--ink); letter-spacing: -0.02em; }
+.history-head p { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.history-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 720px; }
+.history-table th {
+  padding: 11px 22px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--muted);
+  background: var(--surface-2);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.history-table td {
+  padding: 14px 22px;
+  font-size: 13px;
+  color: var(--ink-2);
+  border-top: 1px solid var(--border-subtle);
+  vertical-align: top;
+}
+.history-table tbody tr:hover td { background: var(--surface-2); }
+.history-table td:first-child { white-space: nowrap; color: var(--muted); font-variant-numeric: tabular-nums; }
+.history-table td:nth-child(2) { max-width: 240px; font-weight: 650; color: var(--ink); }
+.history-table td:nth-child(4) { max-width: 420px; line-height: 1.55; overflow-wrap: anywhere; }
+.history-empty { text-align: center !important; color: var(--muted-2) !important; padding: 48px 20px !important; }
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 9px;
+  border-radius: 99px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--ok-bg);
+  color: var(--ok-ink);
+  border: 1px solid var(--ok-border);
+  white-space: nowrap;
+}
+.status-badge.error { background: var(--danger-bg); color: var(--danger-ink); border-color: var(--danger-border); }
+.h-link {
+  display: inline-flex;
+  margin-top: 6px;
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--brand-ink);
+  font-size: 11.5px;
+  font-weight: 700;
+}
+.h-link:hover { text-decoration: underline; }
+.h-link.error { color: var(--danger-ink); }
+
+/* ===================== MODALS ===================== */
+dialog { border: 0; padding: 0; background: transparent; max-width: none; max-height: calc(100vh - 32px); color: var(--ink); }
+dialog::backdrop { background: rgba(15, 23, 42, 0.5); backdrop-filter: blur(4px); }
+dialog[open] .modal { animation: modalIn 0.18s cubic-bezier(0.16, 1, 0.3, 1); }
+@keyframes modalIn { from { opacity: 0; transform: translateY(8px) scale(0.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.modal {
+  width: min(520px, calc(100vw - 28px));
+  max-height: calc(100vh - 32px);
+  overflow: auto;
+  background: var(--surface);
+  border-radius: 14px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-modal);
+}
+.modal-head {
+  padding: 18px 22px 15px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+.modal-head h2 { font-size: 16px; font-weight: 800; letter-spacing: -0.025em; }
+.modal-head p { font-size: 12px; color: var(--muted); margin-top: 3px; }
+.close-btn {
+  border: 0;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: var(--surface-3);
+  color: var(--muted);
+  display: grid;
+  place-items: center;
+}
+.close-btn:hover { background: #e2e8f0; color: var(--ink); }
+.modal-body { padding: 18px 22px; }
+.modal-foot {
+  padding: 14px 22px 18px;
+  display: flex;
+  gap: 8px;
+  border-top: 1px solid var(--border-subtle);
+  background: var(--surface-2);
+}
+.modal-foot .fetch-btn { height: 38px; flex: 2; }
+.modal-foot .btn-cancel {
+  height: 38px;
+  flex: 1;
+  border-radius: 8px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--ink-2);
+  font-size: 12.5px;
+  font-weight: 700;
+}
+.settings-block + .settings-block { border-top: 1px solid var(--border-subtle); padding-top: 18px; margin-top: 18px; }
+.settings-block h3 { font-size: 13.5px; font-weight: 750; }
+.settings-block > p { font-size: 12px; color: var(--muted); margin: 3px 0 12px; }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.form-grid .full { grid-column: 1 / -1; }
+.form-grid label { display: block; font-size: 12px; font-weight: 650; color: var(--ink-2); margin-bottom: 5px; }
+.form-grid select, .form-grid input {
+  width: 100%;
+  height: 38px;
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--ink);
+  padding: 0 11px;
+  font-size: 13px;
+  outline: none;
+}
+.form-grid select:focus, .form-grid input:focus { border-color: var(--brand); box-shadow: var(--focus-ring); }
+.form-grid input:disabled { background: var(--surface-2); color: var(--muted); border-color: var(--border); }
+.rising-action { width: 100%; margin-top: 9px; padding: 9px 10px; border: 1px solid #acd7c7; border-radius: 8px; background: #f3faf6; color: #17664b; font-size: 12px; font-weight: 750; text-align: left; }
+.rising-action:hover:not(:disabled) { background: #e8f7ee; }
+.rising-action:disabled { opacity: .6; }
+.rising-status { margin-top: 6px; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.rising-meta { display: block; margin-top: 4px; color: #17664b; font-size: 10.5px; line-height: 1.4; }
+.profile-row { display: flex; gap: 6px; margin: 0 0 9px; }
+.profile-row select { flex: 1; min-width: 0; height: 34px; border: 1px solid var(--border-strong); border-radius: 7px; padding: 0 8px; color: var(--ink); background: var(--surface); font-size: 12px; }
+.profile-row button { padding: 0 10px; border: 1px solid var(--border-strong); border-radius: 7px; color: var(--ink-2); background: var(--surface-2); font-size: 11px; font-weight: 700; }
+.credential-note { font-size: 11px; color: var(--muted); margin-top: 5px; line-height: 1.5; }
+.draft-context { padding: 0 16px 10px; color: var(--muted); font-size: 11.5px; line-height: 1.5; }
+.draft-context strong { color: var(--ink-2); }
+.draft-context select { max-width: 100%; margin-top: 7px; padding: 6px 9px; color: var(--ink); background: var(--surface); border: 1px solid var(--border-strong); border-radius: 7px; font-size: 11.5px; }
+.draft-progress { margin: 0 16px 12px; padding: 9px 10px; border-radius: 8px; background: #eef7f2; color: #17664b; font-size: 11.5px; line-height: 1.45; }
+.draft-option { margin: 10px 0; padding: 13px 15px; border: 1px solid #c5e5d6; border-radius: 10px; background: #f6fbf8; }
+.draft-option strong { display: block; color: #17664b; font-size: 12px; }
+.draft-option p { margin: 7px 0; color: var(--ink); font-size: 12.5px; line-height: 1.6; white-space: pre-wrap; }
+.draft-option small { display: block; color: var(--muted); font-size: 11px; line-height: 1.45; }
+.draft-option button { margin-top: 8px; }
+.draft-config-hint { color: var(--muted); font-size: 11.5px; line-height: 1.5; margin: 0 0 10px; }
+.variant-action { margin-top: 8px; }
+
+.capture { border: 1px solid var(--border-strong); border-radius: 10px; overflow: hidden; }
+.capture-bar {
+  height: 36px;
+  background: #f1f5f9;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  gap: 6px;
+}
+.capture-bar i { width: 9px; height: 9px; border-radius: 50%; }
+.capture-bar i:nth-child(1) { background: #ef4444; }
+.capture-bar i:nth-child(2) { background: #f59e0b; }
+.capture-bar i:nth-child(3) { background: #22c55e; }
+.capture-bar span {
+  font-size: 11.5px;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--border);
+  padding: 3px 9px;
+  border-radius: 6px;
+  margin-left: 8px;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.capture-body { padding: 18px; background: #fff; min-height: 140px; }
+.capture-title { font-size: 13.5px; font-weight: 750; padding-bottom: 11px; border-bottom: 1px solid var(--border-subtle); }
+.capture-error {
+  margin-top: 12px;
+  padding: 11px 13px;
+  border: 1px solid var(--danger-border);
+  background: var(--danger-bg);
+  color: var(--danger-ink);
+  border-radius: 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.toast {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  transform: translateY(12px);
+  opacity: 0;
+  pointer-events: none;
+  background: #0f172a;
+  color: #ffffff;
+  border-radius: 10px;
+  padding: 10px 15px;
+  font-size: 12.5px;
+  font-weight: 600;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.25);
+  transition: opacity 0.18s, transform 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 99;
+}
+.toast.show { opacity: 1; transform: translateY(0); }
+
+/* ===================== RESPONSIVE ===================== */
+@media (max-width: 1180px) {
+  html, body { overflow: auto; height: auto; }
+  .app-frame { height: auto; min-height: 100vh; width: 100%; overflow: visible; }
+  .rail { position: sticky; top: 0; height: 100vh; }
+  .main-shell { height: auto; overflow: visible; }
+  .studio-view { grid-template-columns: 300px minmax(0, 1fr); overflow: visible; }
+  .inspector-pane { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--border); }
+  .feed-scroll { max-height: 520px; }
+}
+@media (max-width: 820px) {
+  .app-frame { grid-template-columns: 1fr; }
+  .rail {
+    position: sticky;
+    top: 0;
+    height: 52px;
+    flex-direction: row;
+    padding: 0 12px;
+    border-right: 0;
+    border-bottom: 1px solid #1e262f;
+  }
+  .rail-logo { margin-bottom: 0; width: 32px; height: 32px; }
+  .rail-btn.active::before { display: none; }
+  .rail-quota { display: none; }
+  .studio-view { grid-template-columns: 1fr; }
+  .feed-pane { border-right: 0; border-bottom: 1px solid var(--border); }
+  .editor-pane { padding: 14px; }
+  .controls-split { grid-template-columns: 1fr; }
+  .model-chip, .top-divider, .view-breadcrumb { display: none; }
+}
+
+.comparison-badge {display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:7px;background:#e9f4ed;color:#28634c;font-size:11px;font-weight:700;white-space:nowrap}
+.comparison-original-link {color:#5a6c63;font-size:12px;font-weight:600;text-decoration:none;white-space:nowrap}
+.comparison-original-link:hover {color:#275a44;text-decoration:underline}
+.original-compare {margin:12px 0 16px;padding:13px 15px;border:1px solid #dce7df;border-radius:12px;background:#f8fbf9}
+.original-compare summary {cursor:pointer;color:#334d40;font-size:12px;font-weight:700;list-style:none}
+.original-compare summary::before {content:'▾';margin-right:7px;color:#66927b}
+.original-compare:not([open]) summary::before {content:'▸'}
+.original-text {margin:11px 0 8px;color:#34433c;font-size:13px;line-height:1.65;white-space:pre-wrap}
+.original-meta,.original-note {margin:7px 0 0;color:#657a6e;font-size:11.5px;line-height:1.55}
+.original-note {color:#8a6031}
+@media(max-width:780px){.comparison-original-link{display:none}.comparison-badge{font-size:10px;padding:4px 6px}}
+
+.reference-view {margin:12px 0 14px;border:1px solid #d9e6dd;border-radius:12px;background:#f6faf7;padding:14px 15px}
+.reference-head {display:flex;align-items:center;gap:8px;justify-content:space-between;color:#294c3b;font-size:12px;font-weight:750}
+.reference-source {font-size:11px;color:#577562;text-decoration:none;font-weight:650}
+.reference-source:hover {text-decoration:underline}
+.reference-quote {margin:10px 0 8px;padding-left:10px;border-left:2px solid #aac7b4;color:#3c5145;font-size:12.5px;line-height:1.6;white-space:pre-wrap}
+.reference-reason {margin:7px 0 0;color:#496256;font-size:12px;line-height:1.55}
+.reference-experience {margin:7px 0 0;color:#6f8076;font-size:11.5px;line-height:1.5}
+.reference-review {margin:8px 0 0;color:#9a6532;font-size:11.5px;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="app-frame">
+  <!-- SLIM DARK ACTIVITY RAIL -->
+  <aside class="rail" aria-label="주 메뉴">
+    <div class="rail-logo" title="운명원 Comment Studio">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+        <path d="M12 2.75c.85 4.85 3.4 7.4 8.25 8.25-4.85.85-7.4 3.4-8.25 8.25-.85-4.85-3.4-7.4-8.25-8.25 4.85-.85 7.4-3.4 8.25-8.25Z" stroke="currentColor" stroke-width="1.9" stroke-linejoin="round"/>
+      </svg>
+    </div>
+
+    <button type="button" class="rail-btn active" data-view="studio" id="navStudio" title="댓글 스튜디오" aria-label="댓글 스튜디오">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/></svg>
+    </button>
+
+    <button type="button" class="rail-btn" data-view="history" id="navHistory" title="작업 이력" aria-label="작업 이력">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15.5 14"/></svg>
+      <span class="rail-badge" id="navHistoryBadge" data-zero="true">0</span>
+    </button>
+
+    <button type="button" class="rail-btn" id="railSettingsBtn" title="연결 설정" aria-label="연결 설정">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+    </button>
+
+    <div class="rail-spacer"></div>
+
+    <div class="rail-quota" title="오늘의 게시 한도">
+      <strong id="railQuotaText">0/10</strong>
+      <span>오늘</span>
+    </div>
+
+    <div class="rail-avatar" id="railProfile" title="선택된 유튜브 프로필">유1</div>
+  </aside>
+
+  <!-- MAIN APP SHELL -->
+  <div class="main-shell">
+    <header class="topbar">
+      <div class="app-brand-title">
+        운명원
+        <span class="studio-tag">Studio</span>
+      </div>
+      <span class="top-divider"></span>
+      <span class="view-breadcrumb" id="viewBreadcrumb">유튜브 댓글 스튜디오</span>
+<span class="comparison-badge">실제 자료 연결</span>
+      <span class="topbar-spacer"></span>
+
+      <button type="button" class="model-chip" id="openSettings" title="생성 API 및 Jev 진단 설정">
+        <span class="dot" aria-hidden="true"></span>
+        생성 <strong id="generationSummary">10100 연결</strong>
+        <span class="sep">/</span>
+        진단 <strong id="jevSummary">기존 Jev</strong>
+      </button>
+
+      <button type="button" class="top-btn" id="resetDemo" title="현재 선택을 초기화">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+        선택 초기화
+      </button>
+    </header>
+
+    <!-- STUDIO VIEW -->
+    <div class="studio-view" id="studioView">
+      <!-- 1. LEFT VIDEO INBOX FEED -->
+      <section class="feed-pane" aria-label="영상 탐색">
+        <div class="feed-header">
+          <div class="feed-top-row">
+            <div class="feed-title">
+              영상 피드
+              <span class="feed-count" id="videoCount">0</span>
+            </div>
+            <div class="feed-actions">
+              <button type="button" class="mini-icon-btn" id="toggleUrlBtn" title="유튜브 URL로 직접 선택" aria-expanded="false">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="fetch-row">
+            <span class="topic-pill">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+              연애
+            </span>
+            <button type="button" class="fetch-btn" id="loadVideos">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              영상 불러오기
+            </button>
+          </div>
+          <button type="button" class="rising-action" id="findRising">↗ 뜨기 전 영상 찾기</button>
+          <p class="rising-status" id="risingStatus" aria-live="polite">조회수 1,000~5,000회, 시간당 150회 이상</p>
+
+          <div class="url-drawer" id="urlDrawer" hidden>
+            <form class="url-form" id="linkForm">
+              <input class="url-input" id="urlInput" type="url" placeholder="youtube.com/watch?v=..." aria-label="유튜브 영상 주소">
+              <button class="url-submit" type="submit">선택</button>
+            </form>
+            <p class="url-msg" id="linkMessage">유튜브 영상 주소를 붙여넣어 바로 선택합니다.</p>
+          </div>
+        </div>
+
+        <div class="feed-filters" id="feedFilters" hidden>
+          <button type="button" class="feed-filter active" data-feed="all">전체</button>
+          <button type="button" class="feed-filter" data-feed="captioned">자막 있음</button>
+          <button type="button" class="feed-filter" data-feed="unposted">미게시</button>
+        </div>
+
+        <div class="feed-scroll">
+          <div class="feed-empty" id="emptyVideos">
+            <span class="feed-empty-icon" aria-hidden="true">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+            </span>
+            <strong id="emptyVideoTitle">최근 연애 영상을 불러오세요</strong>
+            <span id="emptyVideoDescription">상단의 영상 불러오기를 누르면 영상 목록이 이곳에 채워집니다.</span>
+          </div>
+          <div class="video-list" id="videoList" hidden></div>
+        </div>
+      </section>
+
+      <!-- 2. CENTER EDITORIAL STUDIO -->
+      <main class="editor-pane" aria-label="댓글 초안 편집">
+        <div class="editor-inner">
+          <div class="stage-empty" id="emptySelection">
+            <span class="stage-empty-icon" aria-hidden="true">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.7 4.2 2.8 6.3 7 7-4.2.7-6.3 2.8-7 7-.7-4.2-2.8-6.3-7-7 4.2-.7 6.3-2.8 7-7Z"/></svg>
+            </span>
+            <h2>영상을 선택하면 초안 스튜디오가 열립니다</h2>
+            <p>왼쪽 피드에서 영상을 고르면 자막과 시청자 반응을 분석해 핵심 고민과 자연스러운 댓글 초안을 준비합니다.</p>
+          </div>
+
+          <div class="loading-stage" id="analysisLoading" hidden>
+            <span class="spinner" aria-hidden="true"></span>
+            <strong style="color:var(--ink);font-size:14.5px">영상 자막과 반응을 분석하고 있습니다</strong>
+            <span id="analysisStatusText" style="font-size:12.5px">핵심 장면을 찾고 댓글 초안을 작성 중이에요.</span>
+          </div>
+
+          <div class="warning-card" id="selectionFailure" role="alert" hidden>
+            <div class="warning-head">영상을 분석하지 못했어요</div>
+            <p id="selectionFailureMessage"></p>
+            <button type="button" class="ghost-btn" id="retryAnalysis">다시 시도</button>
+          </div>
+
+          <div id="selectionContent" hidden>
+            <!-- Video Context -->
+            <div class="video-context">
+              <img id="selectedThumb" alt="선택한 영상 썸네일">
+              <div class="vc-body">
+                <div class="vc-badges">
+                  <span class="pill" id="selectedSourceBadge">수동 자막</span>
+                  <span class="pill neutral" id="selectedChannelBadge"></span>
+                </div>
+                <div class="vc-title" id="selectedTitle"></div>
+                <div class="vc-meta" id="selectedMeta"></div>
+              </div>
+              <a id="watchLink" class="ext-link" href="#" target="_blank" rel="noopener noreferrer">
+                YouTube
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>
+            </div>
+
+            <!-- AI Concern Highlight -->
+            <div class="concern-card">
+              <span class="concern-icon" aria-hidden="true">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c.7 4.2 2.8 6.3 7 7-4.2.7-6.3 2.8-7 7-.7-4.2-2.8-6.3-7-7 4.2-.7 6.3-2.8 7-7Z"/></svg>
+              </span>
+              <div>
+                <div class="concern-label">AI가 포착한 영상 속 고민</div>
+                <div class="concern-text" id="worryText"></div>
+              </div>
+            </div>
+
+            <!-- Captionless Manual Proof -->
+            <div id="missingSource" class="warning-card" hidden>
+              <div class="warning-head">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <span id="captionWarningTitle">자막이 없어 제목과 설명만 참고했습니다</span>
+              </div>
+              <div>영상을 확인한 뒤 구체적인 장면이나 발언을 짧게 적고, 아래 댓글에도 반영해 주세요.</div>
+              <textarea class="proof-input" id="proofInput" placeholder="예: 1년 만에 다시 만난 자리에서 망설이는 장면" aria-label="직접 확인한 장면이나 발언"></textarea>
+              <button type="button" class="ghost-btn" id="saveProof">확인한 장면 추가</button>
+            </div>
+
+            <!-- Hero Composer -->
+            <div class="composer-card">
+              <div class="composer-top">
+                <div class="composer-top-left">
+                  <label for="draftInput">댓글 초안 <span id="draftModel" style="color:#638273;font-size:11px;font-weight:600"></span></label>
+                </div>
+                <div class="composer-tools">
+                  <div class="seg-control" id="toneChips" role="group" aria-label="말투 선택"></div>
+                  <button type="button" class="ghost-btn" id="nextDraft">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+                    시안 생성
+                  </button>
+                </div>
+              </div>
+              <div class="draft-context">
+                <strong>현재 시안</strong> <span id="currentDraftContext"></span>
+                <div><label for="draftVersionSelect">저장된 시안</label> <select id="draftVersionSelect" aria-label="저장된 시안"></select></div>
+              </div>
+              <div class="draft-progress" id="generationStatus" role="status" hidden><span id="generationStatusText"></span></div>
+              <textarea class="draft-area" id="draftInput" spellcheck="false"></textarea>
+              <div class="composer-footer">
+                <div class="checks-inline" id="draftChecks" aria-live="polite"></div>
+                <div class="counter-box" id="charCounterWrap">
+                  <div class="counter-bar" aria-hidden="true"><span id="charBarFill"></span></div>
+                  <span class="counter-num" id="charCounter"><strong>0</strong> / 120자</span>
+                </div>
+              </div>
+            </div>
+
+            <section class="draft-option" id="candidateCard" hidden aria-label="새로 만든 시안">
+              <strong>새로 만든 시안</strong>
+              <small id="candidateContext"></small>
+              <p id="candidateText"></p>
+              <small id="candidateReviewState"></small>
+              <button type="button" class="ghost-btn" id="applyCandidate">이 시안 사용</button>
+            </section>
+            <section class="draft-option" id="correctionCard" hidden aria-label="Jev 교정 제안">
+              <strong>Jev 교정 제안</strong>
+              <p id="correctionText"></p>
+              <small id="correctionHint"></small>
+              <button type="button" class="ghost-btn" id="applyCorrection">교정안 사용</button>
+            </section>
+            <section class="draft-option" id="variantCard" hidden aria-label="표기 변형 미리보기">
+              <strong>표기 변형 미리보기</strong>
+              <p id="variantText"></p>
+              <small id="variantHint"></small>
+              <button type="button" class="ghost-btn" id="applyVariant">이 표기 사용</button>
+            </section>
+
+            <section class="reference-view" id="referenceView" hidden aria-label="참고한 시청자 관점">
+              <div class="reference-head"><span>참고 댓글과 시청자 관점 <span id="referenceKind"></span></span><a class="reference-source" id="referenceSource" target="_blank" rel="noopener noreferrer">출처 영상 ↗</a></div>
+              <blockquote class="reference-quote" id="referenceQuote"></blockquote>
+              <p class="reference-reason"><strong>이 시안에서 이어간 생각</strong> <span id="referenceReason"></span></p>
+              <p class="reference-experience" id="referenceExperience" hidden></p>
+              <p class="reference-experience" id="referenceJev" hidden></p>
+              <p class="reference-review" id="referenceReview" hidden></p>
+              <button type="button" class="ghost-btn" id="reviewDraft" style="margin-top:8px">현재 댓글 다시 진단</button>
+              <button type="button" class="ghost-btn" id="requestCorrection" style="margin-top:8px" hidden>현재 댓글 교정 제안</button>
+            </section>
+            <details class="original-compare" id="originalCompareCard" open>
+              <summary>이전 시안과 비교</summary>
+              <p class="original-text" id="originalCompareText"></p>
+              <p class="original-meta" id="previousCaption">편집 또는 이전 생성 시안</p>
+              <p class="original-text" id="originalPreviousHydrogen"></p>
+              <p class="original-meta" id="originalToneText"></p>
+              <p class="original-meta" id="originalVersionText"></p>
+              <p class="original-note" id="originalReviewText" hidden></p>
+              <button type="button" class="ghost-btn" id="restorePrevious">이 시안으로 바꾸기</button>
+            </details>
+
+            <!-- First-Class Scene & Perspective Studio Card -->
+            <div class="studio-card">
+              <div class="studio-card-head">
+                <h3>다음 시안 설정</h3>
+                <span class="pill neutral" id="captionSource"></span>
+              </div>
+              <div class="studio-card-body">
+                <p class="draft-config-hint" id="pendingSettingsSummary">설정을 고른 뒤 위의 시안 생성 버튼을 눌러 주세요.</p>
+                <div class="scene-strip" id="sceneTabs"></div>
+                <blockquote class="quote-box">
+                  <span id="quoteText"></span>
+                  <small id="quoteReason"></small>
+                </blockquote>
+
+                <div class="controls-split">
+                  <div>
+                    <div class="sub-label">댓글 관점</div>
+                    <div class="chip-row" id="reactionChips"></div>
+                    <p class="sub-hint" id="reactionHint"></p>
+                  </div>
+                  <label class="switch-pill">
+                    <span>구어식 표기</span>
+                    <span class="switch">
+                      <input type="checkbox" id="spellingToggle">
+                      <span class="slider"></span>
+                    </span>
+                  </label>
+                </div>
+                <button type="button" class="ghost-btn variant-action" id="previewVariant">현재 초안 표기 변형 미리보기</button>
+
+                <div class="viewer-comments">
+                  <div class="sub-label">시청자 반응 후보 · 눌러서 선택</div>
+                  <div id="viewerComments"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <!-- 3. RIGHT INSPECTOR & LIVE CHROME PREVIEW -->
+      <aside class="inspector-pane" aria-label="실시간 미리보기 및 게시">
+        <div class="inspector-scroll">
+          <!-- WYSIWYG YouTube Live Preview -->
+          <div>
+            <div class="inspector-section-title">
+              <span>YouTube 미리보기</span>
+              <span class="yt-live-badge" id="previewLiveBadge"><i></i>실시간 동기화</span>
+            </div>
+            <div class="yt-preview-card">
+              <div class="yt-preview-bar">
+                <span id="previewProfile">Chrome · 유튜브1</span>
+                <span id="previewStateLabel">미리보기</span>
+              </div>
+              <div class="yt-preview-body">
+                <div class="yt-row">
+                  <span class="yt-avatar" id="previewAvatar" aria-hidden="true">유1</span>
+                  <div class="yt-content">
+                    <div class="yt-handle"><span id="previewHandle">유튜브1</span> <span>방금 전</span></div>
+                    <div class="yt-comment-text placeholder" id="livePreviewText">영상을 선택하면 댓글 미리보기가 표시됩니다.</div>
+                  </div>
+                </div>
+                <div class="yt-actions-bar">
+                  <div class="yt-fake-btns"><span>👍 좋아요</span><span>답글</span></div>
+                  <span class="yt-submit-chip" id="ytSubmitChip">댓글</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Automation Pipeline -->
+          <div>
+            <div class="inspector-section-title">
+              <span>게시 파이프라인</span>
+              <span class="pill neutral" id="stageCaption">대기 중</span>
+            </div>
+            <div class="pipeline" id="statusList">
+              <div class="step-row" data-stage="0"><span class="step-dot">1</span><span>크롬 프로필 여는 중</span></div>
+              <div class="step-row" data-stage="1"><span class="step-dot">2</span><span>댓글 한 글자씩 입력</span></div>
+              <div class="step-row" data-stage="2"><span class="step-dot">3</span><span>댓글 게시</span></div>
+              <div class="step-row" data-stage="3"><span class="step-dot">4</span><span>내 댓글 확인</span></div>
+            </div>
+            <p class="stage-note" id="statusNote">게시 버튼을 누르면 전용 크롬 프로필에서 순차 입력을 시작합니다.</p>
+            <button type="button" class="result-cta" id="showLatest" hidden>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+              게시 확인 캡처 보기
+            </button>
+          </div>
+
+          <!-- Mini Recent History -->
+          <div id="miniHistoryWrap" hidden>
+            <div class="inspector-section-title">
+              <span>최근 실행 기록</span>
+              <button type="button" class="h-link" id="openFullHistoryBtn" style="margin:0">전체 보기 →</button>
+            </div>
+            <div class="mini-history-list" id="miniHistoryList"></div>
+          </div>
+        </div>
+
+        <!-- Sticky Publish Dock -->
+        <div class="inspector-dock">
+          <div class="dock-meta">
+            <span>게시 계정 <strong id="activeProfileLabel">유튜브1</strong></span>
+            <span>오늘 <strong id="postingCount">0 / 10건</strong></span>
+          </div>
+          <div class="profile-row">
+            <select id="profileSelect" aria-label="댓글을 달 유튜브 프로필">
+              <option value="youtube1">유튜브1</option>
+              <option value="youtube2">유튜브2</option>
+              <option value="youtube3">유튜브3</option>
+              <option value="auto">영상마다 자동 배정</option>
+            </select>
+            <button type="button" id="prepareProfile">로그인 준비</button>
+          </div>
+          <p class="credential-note" style="margin:-3px 0 8px">각 계정으로 로그인한 뒤 크롬 창을 닫아 주세요.</p>
+          <button type="button" class="publish-btn" id="postButton" disabled>
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+            <span id="postLabel">유튜브1로 댓글 달기</span>
+            <span class="kbd">Ctrl ↵</span>
+          </button>
+          <p class="dock-hint" id="postHint">영상을 선택하고 댓글 초안을 확인해 주세요.</p>
+          <label class="stage-note" id="reviewAckWrap" hidden style="display:block; margin-top:10px">
+            <input type="checkbox" id="reviewAck"> 영상 장면과 최종 댓글을 직접 확인했습니다.
+          </label>
+          <p class="dock-hint">게시를 확인한 시험 댓글은 자동으로 삭제합니다.</p>
+        </div>
+      </aside>
+    </div>
+
+    <!-- DEDICATED FULL-SCREEN HISTORY VIEW -->
+    <section class="history-view" id="historyView" hidden aria-labelledby="historyHeading">
+      <div class="history-container">
+        <div class="history-head">
+          <div>
+            <h2 id="historyHeading">작업 이력</h2>
+            <p>시간순으로 게시 시도, 입력한 댓글 및 확인 캡처를 조회합니다.</p>
+          </div>
+          <div class="seg-control" role="group" aria-label="이력 필터">
+            <button type="button" class="seg-btn active" data-filter="all">전체</button>
+            <button type="button" class="seg-btn" data-filter="success">게시 완료</button>
+            <button type="button" class="seg-btn" data-filter="failure">실패</button>
+          </div>
+        </div>
+        <div style="overflow:auto">
+          <table class="history-table">
+            <thead>
+              <tr>
+                <th>시간</th>
+                <th>영상</th>
+                <th>프로필</th>
+                <th>댓글</th>
+                <th>결과</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody">
+              <tr><td class="history-empty" colspan="5">아직 진행된 작업이 없습니다.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<!-- SETTINGS MODAL -->
+<dialog id="settingsDialog" aria-labelledby="settingsTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="settingsTitle">연결 설정</h2>
+        <p>댓글 생성 API와 Jev 진단 엔진을 각각 독립적으로 구성합니다.</p>
+      </div>
+      <button class="close-btn" type="button" data-close="settingsDialog" aria-label="설정 닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <section class="settings-block">
+        <h3>댓글 생성 및 교정 API</h3>
+        <p>장면 분석, 댓글 초안 작성 및 교정에 사용할 연결입니다.</p>
+        <div class="form-grid">
+          <div>
+            <label for="generationSelect">연결 방식</label>
+            <select id="generationSelect">
+              <option value="local">10100 로컬 연결</option>
+              <option value="openai">OpenAI API</option>
+              <option value="gcp">GCP API</option>
+            </select>
+          </div>
+          <div>
+            <label for="generationModel">모델명</label>
+            <input type="text" id="generationModel" autocomplete="off">
+          </div>
+          <div class="full">
+            <label for="generationDetail" id="generationDetailLabel">엔드포인트</label>
+            <input type="text" id="generationDetail" disabled>
+          </div>
+          <div class="full" id="openaiKeyField" hidden>
+            <label for="openaiKey">OpenAI API 키</label>
+            <input type="password" id="openaiKey" autocomplete="new-password" placeholder="새 키를 입력할 때만 작성">
+            <p class="credential-note" id="openaiKeyStatus">앱이 실행되는 동안만 사용합니다. 다시 열면 입력해 주세요.</p>
+            <button type="button" class="h-link" id="clearOpenaiKey">입력한 키 지우기</button>
+          </div>
+          <div id="gcpProjectField" hidden>
+            <label for="gcpProject">프로젝트 ID</label>
+            <input type="text" id="gcpProject" placeholder="my-gcp-project" autocomplete="off">
+          </div>
+          <div id="gcpRegionField" hidden>
+            <label for="gcpRegion">리전</label>
+            <input type="text" id="gcpRegion" placeholder="asia-northeast3" autocomplete="off">
+          </div>
+        </div>
+      </section>
+      <section class="settings-block">
+        <h3>Jev 품질 진단</h3>
+        <p>생성 API와 독립적으로 진단 연결을 선택합니다.</p>
+        <div class="form-grid">
+          <div>
+            <label for="jevSelect">진단 연결</label>
+            <select id="jevSelect">
+              <option value="existing">기존 PoC Jev</option>
+              <option value="official">공식 Jev</option>
+            </select>
+          </div>
+          <div>
+            <label for="jevModel">모델명</label>
+            <input type="text" id="jevModel" autocomplete="off">
+          </div>
+          <div class="full">
+            <label for="jevCredential">인증 상태</label>
+            <input id="jevCredential" type="text" value="서버의 인증 정보 사용" disabled>
+          </div>
+        </div>
+      </section>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="btn-cancel" data-close="settingsDialog">취소</button>
+      <button type="button" class="fetch-btn" id="saveSettings">설정 저장</button>
+    </div>
+  </div>
+</dialog>
+
+<!-- RESULT CAPTURE MODAL -->
+<dialog id="resultDialog" aria-labelledby="resultTitle">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <h2 id="resultTitle">게시 확인 화면</h2>
+        <p id="resultSubtitle">작업 기록에 저장된 브라우저 확인 화면입니다.</p>
+      </div>
+      <button class="close-btn" type="button" data-close="resultDialog" aria-label="결과 닫기">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="capture">
+        <div class="capture-bar">
+          <i></i><i></i><i></i>
+          <span id="resultUrl">youtube.com/watch</span>
+        </div>
+        <div class="capture-body">
+          <div class="capture-title" id="resultVideo"></div>
+          <div class="yt-row" id="resultCommentBlock" style="margin-top:14px">
+            <span class="yt-avatar" aria-hidden="true">유1</span>
+            <div class="yt-content">
+              <div class="yt-handle">@youtube1 <span>방금 전</span></div>
+              <div class="yt-comment-text" id="resultText" style="min-height:auto"></div>
+              <div class="yt-fake-btns" style="margin-top:8px"><span>👍 좋아요</span><span>답글</span></div>
+            </div>
+          </div>
+          <div class="capture-error" id="resultError" hidden></div>
+        </div>
+      </div>
+      <p class="sub-hint" id="resultCaption" style="margin-top:10px"></p>
+    </div>
+    <div class="modal-foot">
+      <button type="button" class="fetch-btn" data-close="resultDialog">확인</button>
+    </div>
+  </div>
+</dialog>
+
+<div class="toast" id="toast" role="status"></div>
+
+<script src="/assets/prototype.js" defer></script>
+</body>
+</html>

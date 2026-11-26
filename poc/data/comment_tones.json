@@ -1,0 +1,244 @@
+{
+  "description": "수집된 유튜브 댓글에서 고른 말투 예시. 실제 표현을 짧게 발췌했다.",
+  "observed_comments": 224,
+  "observed_videos": 12,
+  "selection": "말투 다양성을 위해 수동 선별한 예시이며 집단별 빈도 통계가 아니다.",
+  "usage": [
+    "원문을 그대로 복사하지 않고 말투의 특징만 참고한다.",
+    "영상 근거와 선택한 감정, 입장을 우선한다.",
+    "감정, 존댓말 여부, 문장 구조, 표기 습관은 독립적으로 조합할 수 있다.",
+    "사용자가 제공하지 않은 개인적 경험을 새로 만들지 않는다."
+  ],
+  "groups": [
+    {
+      "id": "brief_informal",
+      "label": "짧고 단정적인 반말",
+      "register": "반말/문장 생략",
+      "features": "상황을 먼저 짚고 '~임', '~음'처럼 짧게 판단을 마친다.",
+      "caution": "짧다는 이유로 영상 장면이나 의견까지 생략하지 않는다.",
+      "examples": [
+        {
+          "video_id": "IOz2MKthMJA",
+          "comment_id": "UgwsAQyHNTfCZNjdTph4AaABAg",
+          "excerpt": "둘이 천생연분인 증거임.",
+          "title": "새장 안에 있던 새는 문이 열려도 날지 못한다ㅣ타이완 1부ㅣ72시간 소개팅",
+          "url": "https://www.youtube.com/watch?v=IOz2MKthMJA&lc=UgwsAQyHNTfCZNjdTph4AaABAg"
+        },
+        {
+          "video_id": "C2LVY7NZeFU",
+          "comment_id": "Ugwd5WcBaW6uNe2I0Yh4AaABAg",
+          "excerpt": "나이먹음 고쳐지기 쉽지않음",
+          "title": "끝이 보이는 연애",
+          "url": "https://www.youtube.com/watch?v=C2LVY7NZeFU&lc=Ugwd5WcBaW6uNe2I0Yh4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "warm_polite",
+      "label": "차분한 해요체 공감",
+      "register": "해요체",
+      "features": "자신의 느낌이나 상대의 마음을 담담하게 말하고 '~네요', '~것 같아요'로 마친다.",
+      "caution": "서로 다른 감정을 모두 '깊이 공감해요'로 바꾸지 않는다.",
+      "examples": [
+        {
+          "video_id": "JqW9PxxvuAA",
+          "comment_id": "Ugwv8WNxrPBA5ZgF-Ph4AaABAg",
+          "excerpt": "저시절 생각이 나는 영상이라 공감이 많이 되네요.",
+          "title": "20대에만 할 수 있는 연애 (SUB)",
+          "url": "https://www.youtube.com/watch?v=JqW9PxxvuAA&lc=Ugwv8WNxrPBA5ZgF-Ph4AaABAg"
+        },
+        {
+          "video_id": "ZtoxofTKy7I",
+          "comment_id": "UgwqagQm4ncJYwhs_TR4AaABAg",
+          "excerpt": "서로의 언어를 이해하는 시간을 가졌으면 좋겠네요.",
+          "title": "남자친구 짜증 내는 말투 고치는 법",
+          "url": "https://www.youtube.com/watch?v=ZtoxofTKy7I&lc=UgwqagQm4ncJYwhs_TR4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "question_reaction",
+      "label": "질문하듯 바로 반응",
+      "register": "반말 또는 해요체",
+      "features": "행동을 짚고 '왜 그러지?', '~거임?' 같은 물음으로 답답함이나 궁금함을 드러낸다.",
+      "caution": "질문을 쓴다는 이유로 답을 이미 아는 사실까지 의문으로 바꾸지 않는다.",
+      "examples": [
+        {
+          "video_id": "JqW9PxxvuAA",
+          "comment_id": "Ugw1JKRFyuxCvf6V1k14AaABAg",
+          "excerpt": "저런 멘트 왜 치는거임??",
+          "title": "20대에만 할 수 있는 연애 (SUB)",
+          "url": "https://www.youtube.com/watch?v=JqW9PxxvuAA&lc=Ugw1JKRFyuxCvf6V1k14AaABAg"
+        },
+        {
+          "video_id": "ku4sejh-O4s",
+          "comment_id": "UgyS4yPFAfbDWKfeSQB4AaABAg",
+          "excerpt": "왜 다른 사람들 눈치는 잘보면서 여친 눈치만 안봄??",
+          "title": "남친이 내 존재를 숨기는 이유 [진흙탕 연애담] EP.1",
+          "url": "https://www.youtube.com/watch?v=ku4sejh-O4s&lc=UgyS4yPFAfbDWKfeSQB4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "angry_critical",
+      "label": "화가 난 직설적 비판",
+      "register": "반말/직설",
+      "features": "마음에 걸린 행동을 구체적으로 짚고 강한 평가를 바로 붙인다.",
+      "caution": "분노나 비판을 자동으로 공손한 공감으로 순화하지 않는다.",
+      "examples": [
+        {
+          "video_id": "EKAuoWFfn-s",
+          "comment_id": "UgylAVsNKyRBvnjoYPt4AaABAg",
+          "excerpt": "팀장 개양심없네",
+          "title": "😎자칭 연애고수(?) 주우재가 고민 해결해드립니다ㅣISTP 주우재의 연애 고민상담소",
+          "url": "https://www.youtube.com/watch?v=EKAuoWFfn-s&lc=UgylAVsNKyRBvnjoYPt4AaABAg"
+        },
+        {
+          "video_id": "ra7McPkIfeE",
+          "comment_id": "UgwPO1Ipf17MYgSHHwJ4AaABAg",
+          "excerpt": "짜증나서 못보겠네",
+          "title": "연애학개론 | 웹드라마 [비몽사몽] 7화",
+          "url": "https://www.youtube.com/watch?v=ra7McPkIfeE&lc=UgwPO1Ipf17MYgSHHwJ4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "qualified_view",
+      "label": "조건을 붙여 의견 내기",
+      "register": "해요체/혼합",
+      "features": "한쪽 가능성을 인정한 뒤 특정 조건이나 이유를 덧붙인다.",
+      "caution": "반대 입장과 찬성 입장을 평균적인 중립 의견으로 합치지 않는다.",
+      "examples": [
+        {
+          "video_id": "C2LVY7NZeFU",
+          "comment_id": "UgzbQ5gnDvJxBlk_4214AaABAg",
+          "excerpt": "둘 다 애정이 남아있다면 한 번 더",
+          "title": "끝이 보이는 연애",
+          "url": "https://www.youtube.com/watch?v=C2LVY7NZeFU&lc=UgzbQ5gnDvJxBlk_4214AaABAg"
+        },
+        {
+          "video_id": "Tz3Hagf0WMI",
+          "comment_id": "Ugy1ysE65dvp9t635Gl4AaABAg",
+          "excerpt": "싫은건 아닌데 눈치 없는 설정을 떠나서",
+          "title": "전 여친 다시 만나고 싶은 순간 [연플리 시즌3] - EP.07",
+          "url": "https://www.youtube.com/watch?v=Tz3Hagf0WMI&lc=Ugy1ysE65dvp9t635Gl4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "practical_advice",
+      "label": "직접 권하거나 조심스럽게 조언",
+      "register": "해요체/하십시오체",
+      "features": "'하지 마세요', '~보시면 좋을 것 같아요'처럼 행동을 권한다.",
+      "caution": "조언은 선택한 장면과 관련된 행동에 붙이고 원문에 없는 경험은 만들지 않는다.",
+      "examples": [
+        {
+          "video_id": "erMw0-yYWFE",
+          "comment_id": "UgxqdUK0CcidyL8SLWt4AaABAg",
+          "excerpt": "감정 억누르지마세요 언젠가는 터집니다.",
+          "title": "언니 덕분에 결국 전남친한테 연락 왔어..100% 재회, 이별극복-복수‼️이별사연에 맞는 이별처방전🏥 9년 장기연애부터 단기연애까지❤️‍🩹[EP.189]",
+          "url": "https://www.youtube.com/watch?v=erMw0-yYWFE&lc=UgxqdUK0CcidyL8SLWt4AaABAg"
+        },
+        {
+          "video_id": "ZtoxofTKy7I",
+          "comment_id": "UgynP9D7RpRcaI6x8_J4AaABAg",
+          "excerpt": "본인문제부터 되돌아 보시면 좋을 것 같아요!!",
+          "title": "남자친구 짜증 내는 말투 고치는 법",
+          "url": "https://www.youtube.com/watch?v=ZtoxofTKy7I&lc=UgynP9D7RpRcaI6x8_J4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "uncertain_worried",
+      "label": "망설임이나 걱정을 남기는 말투",
+      "register": "혼합",
+      "features": "바라는 마음과 불안함을 함께 두고 문장을 여운 있게 끝낸다.",
+      "caution": "불확실한 감상을 확신에 찬 결론으로 바꾸지 않는다.",
+      "examples": [
+        {
+          "video_id": "C2LVY7NZeFU",
+          "comment_id": "UgwKmLDRFR3gfoBpdal4AaABAg",
+          "excerpt": "또 헤어질것 같은 두려움",
+          "title": "끝이 보이는 연애",
+          "url": "https://www.youtube.com/watch?v=C2LVY7NZeFU&lc=UgwKmLDRFR3gfoBpdal4AaABAg"
+        },
+        {
+          "video_id": "JqW9PxxvuAA",
+          "comment_id": "UgxfO5xNu0ocRkNOX3l4AaABAg",
+          "excerpt": "저때 안놀면 언제 노나 싶으면서도",
+          "title": "20대에만 할 수 있는 연애 (SUB)",
+          "url": "https://www.youtube.com/watch?v=JqW9PxxvuAA&lc=UgxfO5xNu0ocRkNOX3l4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "humorous_reaction",
+      "label": "웃으며 상황을 짚기",
+      "register": "반말/감탄",
+      "features": "장면을 짧게 콕 집고 'ㅋㅋ', 생략부호나 의외라는 반응을 섞는다.",
+      "caution": "모든 댓글에 ㅋㅋ를 붙이지 않고 영상 장면과 감정에 맞춰 선택한다.",
+      "examples": [
+        {
+          "video_id": "Tz3Hagf0WMI",
+          "comment_id": "Ugypl58Nb6MmsLUkMOh4AaABAg",
+          "excerpt": "얘네 음악 동아리였짘ㅋㅋㅋㅋ",
+          "title": "전 여친 다시 만나고 싶은 순간 [연플리 시즌3] - EP.07",
+          "url": "https://www.youtube.com/watch?v=Tz3Hagf0WMI&lc=Ugypl58Nb6MmsLUkMOh4AaABAg"
+        },
+        {
+          "video_id": "EKAuoWFfn-s",
+          "comment_id": "UgxIBOnhVGOIYTwqtmN4AaABAg",
+          "excerpt": "풍물동아리 왜케 잘함 ㅋㅋㅋㅋ",
+          "title": "😎자칭 연애고수(?) 주우재가 고민 해결해드립니다ㅣISTP 주우재의 연애 고민상담소",
+          "url": "https://www.youtube.com/watch?v=EKAuoWFfn-s&lc=UgxIBOnhVGOIYTwqtmN4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "scene_interpretation",
+      "label": "행동을 보고 마음 해석",
+      "register": "해요체/서술",
+      "features": "출연자의 구체적인 행동을 짚은 뒤 마음이나 이유를 자신의 해석으로 덧붙인다.",
+      "caution": "관찰과 추측을 구분해 영상에 없는 속마음을 사실로 단정하지 않는다.",
+      "examples": [
+        {
+          "video_id": "ZtoxofTKy7I",
+          "comment_id": "UgwqagQm4ncJYwhs_TR4AaABAg",
+          "excerpt": "속상하고 걱정돼서 하는 말이지",
+          "title": "남자친구 짜증 내는 말투 고치는 법",
+          "url": "https://www.youtube.com/watch?v=ZtoxofTKy7I&lc=UgwqagQm4ncJYwhs_TR4AaABAg"
+        },
+        {
+          "video_id": "C2LVY7NZeFU",
+          "comment_id": "UgyYea0Le-2q7E3T9Yd4AaABAg",
+          "excerpt": "뭔가 어색하면서도 불편해보이냐",
+          "title": "끝이 보이는 연애",
+          "url": "https://www.youtube.com/watch?v=C2LVY7NZeFU&lc=UgyYea0Le-2q7E3T9Yd4AaABAg"
+        }
+      ]
+    },
+    {
+      "id": "casual_spelling",
+      "label": "띄어쓰기와 구어식 표기",
+      "register": "반말/해요체",
+      "features": "띄어쓰기를 붙이거나 '좋겟', '더라구요'처럼 일상적인 표기를 섞는다.",
+      "caution": "표기 변형은 일부에만 적용하고 인용 발언과 브랜드 문장은 보호한다.",
+      "examples": [
+        {
+          "video_id": "C2LVY7NZeFU",
+          "comment_id": "UgwtMvVzYAfYDxFwL2d4AaABAg",
+          "excerpt": "데이트햇음좋겟다ㅜㅜ",
+          "title": "끝이 보이는 연애",
+          "url": "https://www.youtube.com/watch?v=C2LVY7NZeFU&lc=UgwtMvVzYAfYDxFwL2d4AaABAg"
+        },
+        {
+          "video_id": "erMw0-yYWFE",
+          "comment_id": "UgzjWmXjHVvyb4Krpa14AaABAg",
+          "excerpt": "제발 그만하자고 하더라구요",
+          "title": "언니 덕분에 결국 전남친한테 연락 왔어..100% 재회, 이별극복-복수‼️이별사연에 맞는 이별처방전🏥 9년 장기연애부터 단기연애까지❤️‍🩹[EP.189]",
+          "url": "https://www.youtube.com/watch?v=erMw0-yYWFE&lc=UgzjWmXjHVvyb4Krpa14AaABAg"
+        }
+      ]
+    }
+  ]
+}
